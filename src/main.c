@@ -211,11 +211,11 @@ void Anzeigen(int a )
 
     //LCD_SetBacklight(1023);
     UDOUBLE Imagesize = LCD_1IN14_V2_HEIGHT*LCD_1IN14_V2_WIDTH*2;
-    UWORD *BlackImage;
-    if((BlackImage = (UWORD *)malloc(Imagesize)) == NULL) {
+    UWORD BlackImage[LCD_1IN14_V2_HEIGHT*LCD_1IN14_V2_WIDTH*2];
+/*    if((BlackImage = (UWORD *)malloc(Imagesize)) == NULL) {
         printf("Failed to apply for black memory...\r\n");
         exit(0);
-    }
+    }*/
     
     // /*1.Create a new image cache named IMAGE_RGB and fill it with white*/
     Paint_NewImage((UBYTE *)BlackImage,LCD_1IN14_V2.WIDTH,LCD_1IN14_V2.HEIGHT, 0, WHITE);
@@ -227,18 +227,12 @@ void Anzeigen(int a )
     // /* GUI */
     printf("drawing...\r\n");
     // /*2.Drawing on the image*/
-#if 1
-    // /*3.Refresh the picture in RAM to LCD*/
-    LCD_1IN14_V2_Display(BlackImage);
-    DEV_Delay_ms(1000);
-    DEV_SET_PWM(10);
-#endif
 
 
     switch(a) //die Print befehle müssen wir jetzt noch durch Übergaben an den Bildschirm ersetzen
     {
         //pressure
-        case 1:
+        case 0:
             Paint_Clear(WHITE);
             Paint_DrawString_EN(10,20, "Pressure:", &Font16, BLACK, WHITE); 
             Paint_DrawNum (120, 20 ,pressure, &Font16,3,  RED,  WHITE);
@@ -248,7 +242,7 @@ void Anzeigen(int a )
             DEV_Delay_ms(1000);
             break;
         //Temperature
-        case 2:
+        case 1:
             Paint_Clear(WHITE);
             Paint_DrawString_EN(10, 20, "Temperature:", &Font16, BLACK, WHITE); 
             Paint_DrawNum (50, 40 ,temperature, &Font16,3,  RED,  WHITE);
@@ -257,7 +251,7 @@ void Anzeigen(int a )
             DEV_Delay_ms(1000);
             break;
         //humidity
-        case 3:
+        case 2:
             Paint_Clear(WHITE);
             Paint_DrawString_EN(10, 20, "Humidity:", &Font16, BLACK, WHITE); 
             Paint_DrawNum (50, 40 ,humidity, &Font16,3,  RED,  WHITE);
@@ -279,7 +273,7 @@ void Anzeigen(int a )
             DEV_Delay_ms(1000);
             break;
     }
-    free(BlackImage);
+    //free(BlackImage);
     //BlackImage = NULL;
     
     //DEV_Module_Exit();  //aufpassen vielleicht muss der auch wieder rein?
@@ -295,7 +289,7 @@ int main(void) //in main umbenennen?
     //alles initialisieren
     stdio_init_all();
  
-    DEV_Delay_ms(100);
+    DEV_Delay_ms(2000);
     printf("LCD_1in14_test Demo\r\n");
     if(DEV_Module_Init()!=0){
         return -1;
@@ -364,86 +358,24 @@ int main(void) //in main umbenennen?
     SET_Infrared_PIN(ctrl);
 
 
-   int i = 3;
+   int i = 0;
     //Große While Schleife
      //Schleife, die das Programm am Laufen hält
     while (1)
         //if-Bedingungen, die die Modi durchschalten 
        {
-        if (i>5)
-        {
-            i=1;
-        }
         if (DEV_Digital_Read(keyA ) == 0)
         {
-            i = i+1;
-        }
-        if (i==4)
-        {
-            i=1;
+            i = i+1 % 3;
         }
         if (DEV_Digital_Read(keyB ) == 0)
         {
             i=5;
         }
+        printf("i=%d", i);
         Anzeigen(i);
-       
-        /**for(int i=3; i<=3; i++){
-             Anzeigen(i);   
-             if(i==3){
-                i=0;
-             }
-        }**/
-        
-        }
-       
 
-       
-       
-       /*for(int i = 1; i >= 0; i++ )
-         
+    }
 
-            //Schleife, die so lange anzeigt, bis zum nächsten Mal der Button gedrückt wird
-            
-            {
-                
-                //die Anzeigenfunktion soll abhängig von 1 mit Casestruktur einen 
-                //der 3 Werte auslesen und dann an den Bildschirm schicken
-                // 1-> pressure, 2-> temperature, 3-> humidity, 5-> Gesamtanzeige
-                Anzeigen(5);
-                //zur nächsten Iteration von der forschleifen springen, wenn Button 1 gedrückt wird
-               f(DEV_Digital_Read(keyA ) == 0)
-                {
-                    printf("Taste\n");
-                    cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 1);
-                    break;
-                }
-                // zur Anzeige aller Werte springen, wenn Button 2 gedrückt wird
-                if(DEV_Digital_Read(keyB ) == 0)
-                {
-                    i = 4;
-                    break;
-                }
-                sleep_ms(500);
-            }
-            //wenn die Schleife zu weit gewachsen ist, soll sie zurückgesetzt werden -> durchklicken
-            if (i =3)
-            {
-                i = 0;
-            }
-            // wenn man aus Gesamtanzeige rauskommmt, soll es wieder von vorn in dem Einzelanzeigenkreis losgehen
-            if (i>=5)
-            {
-                i = 0;
-            }*/
-        
-    
-    
-
-   
-    
-
-    /* Module Exit */
-    
     return 0;
 }
